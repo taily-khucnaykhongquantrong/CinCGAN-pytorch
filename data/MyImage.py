@@ -1,26 +1,27 @@
 import os
 import os.path
-import random
-import math
-import errno
+# import random
+# import math
+# import errno
 
 from data import common
 
 import numpy as np
 import scipy.misc as misc
 
-import torch
+# import torch
 import torch.utils.data as data
-from torchvision import transforms
+# from torchvision import transforms
+
 
 class MyImage(data.Dataset):
     def __init__(self, args, train=False):
         self.args = args
         self.train = False
-        self.name = 'MyImage'
+        self.name = "MyImage"
         self.scale = args.scale
         self.idx_scale = 0
-        apath = '../test'
+        apath = "../test"
 
         self.filelist = []
         if not train:
@@ -39,7 +40,8 @@ class MyImage(data.Dataset):
 
         img_in, img_tar = common.set_channel(img_in, img_in, self.args.n_colors)
         img_tar = misc.imresize(
-            img_tar, self.scale[self.idx_scale] * 100, interp='bicubic')
+            img_tar, self.scale[self.idx_scale] * 100, interp="bicubic"
+        )
 
         return common.np2Tensor(img_in, img_tar, self.args.rgb_range)
 
@@ -48,4 +50,3 @@ class MyImage(data.Dataset):
 
     def set_scale(self, idx_scale):
         self.idx_scale = idx_scale
-

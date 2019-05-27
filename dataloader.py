@@ -2,13 +2,17 @@ import sys
 import threading
 import queue
 import random
-import collections
+# import collections
 
 import torch
 import torch.multiprocessing as multiprocessing
 
-from torch._C import _set_worker_signal_handlers, _update_worker_pids, \
-    _remove_worker_pids, _error_if_any_worker_fails
+from torch._C import (
+    _set_worker_signal_handlers,
+    _update_worker_pids,
+    # _remove_worker_pids,
+    # _error_if_any_worker_fails,
+)
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataloader import _DataLoaderIter
 from torch.utils.data.dataloader import ManagerWatchdog
@@ -16,19 +20,30 @@ from torch.utils.data.dataloader import _pin_memory_loop
 from torch.utils.data.dataloader import MP_STATUS_CHECK_INTERVAL
 
 from torch.utils.data.dataloader import ExceptionWrapper
-from torch.utils.data.dataloader import _use_shared_memory
-from torch.utils.data.dataloader import numpy_type_map
+# from torch.utils.data.dataloader import _use_shared_memory
+# from torch.utils.data.dataloader import numpy_type_map
 from torch.utils.data.dataloader import default_collate
-from torch.utils.data.dataloader import pin_memory_batch
-from torch.utils.data.dataloader import _SIGCHLD_handler_set
+# from torch.utils.data.dataloader import pin_memory_batch
+# from torch.utils.data.dataloader import _SIGCHLD_handler_set
 from torch.utils.data.dataloader import _set_SIGCHLD_handler
 
-if sys.version_info[0] == 2:
-    import Queue as queue
-else:
-    import queue
+# if sys.version_info[0] == 2:
+#     import Queue as queue
+# else:
+#     import queue
 
-def _ms_loop(dataset, index_queue, data_queue, done_event, collate_fn, scale, seed, init_fn, worker_id):
+
+def _ms_loop(
+    dataset,
+    index_queue,
+    data_queue,
+    done_event,
+    collate_fn,
+    scale,
+    seed,
+    init_fn,
+    worker_id,
+):
     try:
         global _use_shared_memory
         _use_shared_memory = True
@@ -70,6 +85,7 @@ def _ms_loop(dataset, index_queue, data_queue, done_event, collate_fn, scale, se
                 data_queue.put((idx, samples))
     except KeyboardInterrupt:
         pass
+
 
 class _MSDataLoaderIter(_DataLoaderIter):
     def __init__(self, loader):
@@ -115,8 +131,8 @@ class _MSDataLoaderIter(_DataLoaderIter):
                         self.scale,
                         base_seed + i,
                         self.worker_init_fn,
-                        i
-                    )
+                        i,
+                    ),
                 )
                 w.start()
                 self.index_queues.append(index_queue)
@@ -130,8 +146,8 @@ class _MSDataLoaderIter(_DataLoaderIter):
                         self.worker_result_queue,
                         self.data_queue,
                         torch.cuda.current_device(),
-                        self.done_event
-                    )
+                        self.done_event,
+                    ),
                 )
                 pin_memory_thread.daemon = True
                 pin_memory_thread.start()
@@ -146,12 +162,22 @@ class _MSDataLoaderIter(_DataLoaderIter):
             for _ in range(2 * self.num_workers):
                 self._put_indices()
 
+
 class MSDataLoader(DataLoader):
     def __init__(
-        self, args, dataset, batch_size=1, shuffle=False,
-        sampler=None, batch_sampler=None,
-        collate_fn=default_collate, pin_memory=False, drop_last=False,
-        timeout=0, worker_init_fn=None):
+        self,
+        args,
+        dataset,
+        batch_size=1,
+        shuffle=False,
+        sampler=None,
+        batch_sampler=None,
+        collate_fn=default_collate,
+        pin_memory=False,
+        drop_last=False,
+        timeout=0,
+        worker_init_fn=None,
+    ):
 
         super(MSDataLoader, self).__init__(
             dataset,
@@ -164,7 +190,7 @@ class MSDataLoader(DataLoader):
             pin_memory=pin_memory,
             drop_last=drop_last,
             timeout=timeout,
-            worker_init_fn=worker_init_fn
+            worker_init_fn=worker_init_fn,
         )
 
         self.scale = args.scale

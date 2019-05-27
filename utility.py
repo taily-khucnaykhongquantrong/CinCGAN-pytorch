@@ -2,10 +2,9 @@ import os
 import math
 import time
 import datetime
-from functools import reduce
+# from functools import reduce
 
 import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -15,7 +14,10 @@ import torch
 import torch.optim as optim
 import torch.optim.lr_scheduler as lrs
 
-class timer():
+matplotlib.use("Agg")
+
+
+class timer:
     def __init__(self):
         self.acc = 0
         self.tic()
@@ -38,42 +40,45 @@ class timer():
     def reset(self):
         self.acc = 0
 
-class checkpoint():
+
+class checkpoint:
     def __init__(self, args):
         self.args = args
         self.ok = True
         self.log = torch.Tensor()
-        now = datetime.datetime.now().strftime('%Y-%m-%d-%H:%M:%S')
+        now = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%S")
 
-        if args.load == '.':
-            if args.save == '.': args.save = now
-            self.dir = '../experiment/' + args.save
+        if args.load == ".":
+            if args.save == ".":
+                args.save = now
+            self.dir = "../experiment/" + args.save
         else:
-            self.dir = '../experiment/' + args.load
+            self.dir = "../experiment/" + args.load
             if not os.path.exists(self.dir):
-                args.load = '.'
+                args.load = "."
             else:
-                self.log = torch.load(self.dir + '/psnr_log.pt')
-                print('Continue from epoch {}...'.format(len(self.log)))
+                self.log = torch.load(self.dir + "/psnr_log.pt")
+                print("Continue from epoch {}...".format(len(self.log)))
 
         if args.reset:
-            os.system('rm -rf ' + self.dir)
-            args.load = '.'
+            os.system("rm -rf " + self.dir)
+            args.load = "."
 
         def _make_dir(path):
-            if not os.path.exists(path): os.makedirs(path)
+            if not os.path.exists(path):
+                os.makedirs(path)
 
         _make_dir(self.dir)
-        _make_dir(self.dir + '/model')
-        _make_dir(self.dir + '/results')
+        _make_dir(self.dir + "/model")
+        _make_dir(self.dir + "/results")
 
-        open_type = 'a' if os.path.exists(self.dir + '/log.txt') else 'w'
-        self.log_file = open(self.dir + '/log.txt', open_type)
-        with open(self.dir + '/config.txt', open_type) as f:
-            f.write(now + '\n\n')
+        open_type = "a" if os.path.exists(self.dir + "/log.txt") else "w"
+        self.log_file = open(self.dir + "/log.txt", open_type)
+        with open(self.dir + "/config.txt", open_type) as f:
+            f.write(now + "\n\n")
             for arg in vars(args):
-                f.write('{}: {}\n'.format(arg, getattr(args, arg)))
-            f.write('\n')
+                f.write("{}: {}\n".format(arg, getattr(args, arg)))
+            f.write("\n")
 
     def save(self, trainer, epoch, is_best=False):
         trainer.model.save(self.dir, epoch, is_best=is_best)
@@ -81,10 +86,9 @@ class checkpoint():
         trainer.loss.plot_loss(self.dir, epoch)
 
         self.plot_psnr(epoch)
-        torch.save(self.log, os.path.join(self.dir, 'psnr_log.pt'))
+        torch.save(self.log, os.path.join(self.dir, "psnr_log.pt"))
         torch.save(
-            trainer.optimizer.state_dict(),
-            os.path.join(self.dir, 'optimizer.pt')
+            trainer.optimizer.state_dict(), os.path.join(self.dir, "optimizer.pt")
         )
 
     def add_log(self, log):
@@ -92,61 +96,62 @@ class checkpoint():
 
     def write_log(self, log, refresh=False):
         print(log)
-        self.log_file.write(log + '\n')
+        self.log_file.write(log + "\n")
         if refresh:
             self.log_file.close()
-            self.log_file = open(self.dir + '/log.txt', 'a')
+            self.log_file = open(self.dir + "/log.txt", "a")
 
     def done(self):
         self.log_file.close()
 
     def plot_psnr(self, epoch):
         axis = np.linspace(1, epoch, epoch)
-        label = 'SR on {}'.format(self.args.data_test)
+        label = "SR on {}".format(self.args.data_test)
         fig = plt.figure()
         plt.title(label)
         for idx_scale, scale in enumerate(self.args.scale):
             plt.plot(
-                axis,
-                self.log[:, idx_scale].numpy(),
-                label='Scale {}'.format(scale)
+                axis, self.log[:, idx_scale].numpy(), label="Scale {}".format(scale)
             )
         plt.legend()
-        plt.xlabel('Epochs')
-        plt.ylabel('PSNR')
+        plt.xlabel("Epochs")
+        plt.ylabel("PSNR")
         plt.grid(True)
-        plt.savefig('{}/test_{}.pdf'.format(self.dir, self.args.data_test))
+        plt.savefig("{}/test_{}.pdf".format(self.dir, self.args.data_test))
         plt.close(fig)
 
     def save_results(self, filename, save_list, scale):
-        filename = '{}/results/{}_x{}_'.format(self.dir, filename, scale)
-        postfix = ('SR', 'LR', 'HR')
+        filename = "{}/results/{}_x{}_".format(self.dir, filename, scale)
+        postfix = ("SR", "LR", "HR")
         for v, p in zip(save_list, postfix):
             normalized = v[0].data.mul(255 / self.args.rgb_range)
             ndarr = normalized.byte().permute(1, 2, 0).cpu().numpy()
-            misc.imsave('{}{}.png'.format(filename, p), ndarr)
+            misc.imsave("{}{}.png".format(filename, p), ndarr)
+
 
 def quantize(img, rgb_range):
     pixel_range = 255 / rgb_range
     return img.mul(pixel_range).clamp(0, 255).round().div(pixel_range)
+
 
 def calc_psnr_pixsh(sr, hr, scale, rgb_range, benchmark=True):
     psnr = 0
     # diff = (sr - hr).data.div(rgb_range)
     sr.data.div(rgb_range)
     hr.data.div(rgb_range)
-    
+
     shave = scale + 6
     sr = sr[:, :, shave:-shave, shave:-shave]
-    for i in range(2*shave-1):
-        for j in range(2*shave-1):
-            valid = (sr-hr[:, :, i:-2*shave+i, j:-2*shave+j])
+    for i in range(2 * shave - 1):
+        for j in range(2 * shave - 1):
+            valid = sr - hr[:, :, i : -2 * shave + i, j : -2 * shave + j]
             mse = valid.pow(2).mean()
             if psnr < -10 * math.log10(mse):
-                psnr = -10* math.log10(mse)
-
+                psnr = -10 * math.log10(mse)
 
     return psnr
+
+
 def calc_psnr(sr, hr, scale, rgb_range, benchmark=False):
     diff = (sr - hr).data.div(rgb_range)
     if benchmark:
@@ -166,43 +171,35 @@ def calc_psnr(sr, hr, scale, rgb_range, benchmark=False):
 
     return -10 * math.log10(mse)
 
+
 def make_optimizer(args, my_model):
     trainable = filter(lambda x: x.requires_grad, my_model.parameters())
 
-    if args.optimizer == 'SGD':
+    if args.optimizer == "SGD":
         optimizer_function = optim.SGD
-        kwargs = {'momentum': args.momentum}
-    elif args.optimizer == 'ADAM':
+        kwargs = {"momentum": args.momentum}
+    elif args.optimizer == "ADAM":
         optimizer_function = optim.Adam
-        kwargs = {
-            'betas': (args.beta1, args.beta2),
-            'eps': args.epsilon
-        }
-    elif args.optimizer == 'RMSprop':
+        kwargs = {"betas": (args.beta1, args.beta2), "eps": args.epsilon}
+    elif args.optimizer == "RMSprop":
         optimizer_function = optim.RMSprop
-        kwargs = {'eps': args.epsilon}
+        kwargs = {"eps": args.epsilon}
 
-    kwargs['lr'] = args.lr
-    kwargs['weight_decay'] = args.weight_decay
-    
+    kwargs["lr"] = args.lr
+    kwargs["weight_decay"] = args.weight_decay
+
     return optimizer_function(trainable, **kwargs)
 
+
 def make_scheduler(args, my_optimizer):
-    if args.decay_type == 'step':
-        scheduler = lrs.StepLR(
-            my_optimizer,
-            step_size=args.lr_decay,
-            gamma=args.gamma
-        )
-    elif args.decay_type.find('step') >= 0:
-        milestones = args.decay_type.split('_')
+    if args.decay_type == "step":
+        scheduler = lrs.StepLR(my_optimizer, step_size=args.lr_decay, gamma=args.gamma)
+    elif args.decay_type.find("step") >= 0:
+        milestones = args.decay_type.split("_")
         milestones.pop(0)
         milestones = list(map(lambda x: int(x), milestones))
         scheduler = lrs.MultiStepLR(
-            my_optimizer,
-            milestones=milestones,
-            gamma=args.gamma
+            my_optimizer, milestones=milestones, gamma=args.gamma
         )
 
     return scheduler
-

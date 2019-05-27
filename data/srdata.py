@@ -5,14 +5,15 @@ from data import common
 import numpy as np
 import scipy.misc as misc
 
-import torch
+# import torch
 import torch.utils.data as data
+
 
 class SRData(data.Dataset):
     def __init__(self, args, train=True, benchmark=False):
         self.args = args
         self.train = train
-        self.split = 'train' if train else 'test'
+        self.split = "train" if train else "test"
         self.benchmark = benchmark
         self.scale = args.scale
         self.idx_scale = 0
@@ -21,43 +22,39 @@ class SRData(data.Dataset):
 
         def _load_bin():
             self.images_hr = np.load(self._name_hrbin())
-            self.images_lr = [
-                np.load(self._name_lrbin(s)) for s in self.scale
-            ]
+            self.images_lr = [np.load(self._name_lrbin(s)) for s in self.scale]
 
-        if args.ext == 'img' or benchmark:
+        if args.ext == "img" or benchmark:
             self.images_hr, self.images_lr, self.images_lrb = self._scan()
-        elif args.ext.find('sep') >= 0:
+        elif args.ext.find("sep") >= 0:
             self.images_hr, self.images_lr, self.images_lrb = self._scan()
-            if args.ext.find('reset') >= 0:
-                print('Preparing seperated binary files')
+            if args.ext.find("reset") >= 0:
+                print("Preparing seperated binary files")
                 for v in self.images_hr:
                     hr = misc.imread(v)
-                    name_sep = v.replace(self.ext, '.npy')
+                    name_sep = v.replace(self.ext, ".npy")
                     np.save(name_sep, hr)
                 for si, s in enumerate(self.scale):
                     for v in self.images_lr[si]:
                         lr = misc.imread(v)
-                        name_sep = v.replace(self.ext, '.npy')
+                        name_sep = v.replace(self.ext, ".npy")
                         np.save(name_sep, lr)
 
-            self.images_hr = [
-                v.replace(self.ext, '.npy') for v in self.images_hr
-            ]
+            self.images_hr = [v.replace(self.ext, ".npy") for v in self.images_hr]
             self.images_lr = [
-                [v.replace(self.ext, '.npy') for v in self.images_lr[i]]
+                [v.replace(self.ext, ".npy") for v in self.images_lr[i]]
                 for i in range(len(self.scale))
             ]
 
-        elif args.ext.find('bin') >= 0:
+        elif args.ext.find("bin") >= 0:
             try:
-                if args.ext.find('reset') >= 0:
+                if args.ext.find("reset") >= 0:
                     raise IOError
-                print('Loading a binary file')
+                print("Loading a binary file")
                 _load_bin()
             except:
-                print('Preparing a binary file')
-                bin_path = os.path.join(self.apath, 'bin')
+                print("Preparing a binary file")
+                bin_path = os.path.join(self.apath, "bin")
                 if not os.path.isdir(bin_path):
                     os.mkdir(bin_path)
 
@@ -71,7 +68,7 @@ class SRData(data.Dataset):
                     del lr_scale
                 _load_bin()
         else:
-            print('Please define data type')
+            print("Please define data type")
 
     def _scan(self):
         raise NotImplementedError
@@ -89,7 +86,9 @@ class SRData(data.Dataset):
         lr, hr, lrb, filename = self._load_file(idx)
         lr, hr, lrb = self._get_patch(lr, hr, lrb)
         lr, hr, lrb = common.set_channel([lr, hr, lrb], self.args.n_colors)
-        lr_tensor, hr_tensor, lrb_tensor = common.np2Tensor([lr, hr, lrb], self.args.rgb_range)
+        lr_tensor, hr_tensor, lrb_tensor = common.np2Tensor(
+            [lr, hr, lrb], self.args.rgb_range
+        )
         return lr_tensor, hr_tensor, lrb_tensor, filename
 
     def __len__(self):
@@ -103,12 +102,12 @@ class SRData(data.Dataset):
         lr = self.images_lr[self.idx_scale][idx]
         lrb = self.images_lrb[self.idx_scale][idx]
         hr = self.images_hr[idx]
-        if self.args.ext == 'img' or self.benchmark:
+        if self.args.ext == "img" or self.benchmark:
             filename = hr
             lr = misc.imread(lr)
             hr = misc.imread(hr)
             lrb = misc.imread(lrb)
-        elif self.args.ext.find('sep') >= 0:
+        elif self.args.ext.find("sep") >= 0:
             filename = hr
             lr = np.load(lr)
             lrb = np.load(lrb)
@@ -132,10 +131,9 @@ class SRData(data.Dataset):
             # lr = common.add_noise(lr, self.args.noise)
         else:
             ih, iw = lr.shape[0:2]
-            hr = hr[0:ih * scale, 0:iw * scale]
+            hr = hr[0 : ih * scale, 0 : iw * scale]
 
         return lr, hr, lrb
 
     def set_scale(self, idx_scale):
         self.idx_scale = idx_scale
-
