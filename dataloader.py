@@ -19,13 +19,13 @@ from torch.utils.data._utils.pin_memory import _pin_memory_loop
 from torch.utils.data._utils.worker import ManagerWatchdog
 from torch.utils.data._utils import MP_STATUS_CHECK_INTERVAL
 from torch.utils.data._utils import ExceptionWrapper
+from torch.utils.data._utils.signal_handling import _set_SIGCHLD_handler
+from torch.utils.data.dataloader import default_collate
 
 # from torch.utils.data.dataloader import _use_shared_memory
 # from torch.utils.data.dataloader import numpy_type_map
-from torch.utils.data.dataloader import default_collate
 # from torch.utils.data.dataloader import pin_memory_batch
 # from torch.utils.data.dataloader import _SIGCHLD_handler_set
-from torch.utils.data.dataloader import _set_SIGCHLD_handler
 
 # if sys.version_info[0] == 2:
 #     import Queue as queue
