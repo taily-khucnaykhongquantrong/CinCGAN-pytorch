@@ -15,11 +15,11 @@ from torch._C import (
 )
 from torch.utils.data.dataloader import DataLoader
 from torch.utils.data.dataloader import _DataLoaderIter
-from torch.utils.data.dataloader import _pin_memory_loop
+from torch.utils.data._utils.pin_memory import _pin_memory_loop
 from torch.utils.data._utils.worker import ManagerWatchdog
 from torch.utils.data._utils import MP_STATUS_CHECK_INTERVAL
+from torch.utils.data._utils import ExceptionWrapper
 
-from torch.utils.data.dataloader import ExceptionWrapper
 # from torch.utils.data.dataloader import _use_shared_memory
 # from torch.utils.data.dataloader import numpy_type_map
 from torch.utils.data.dataloader import default_collate
