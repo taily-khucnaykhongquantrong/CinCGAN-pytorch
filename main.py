@@ -361,6 +361,9 @@ def test(test_data_loader, model, epoch):
     model.eval()
     for iteration, batch in enumerate(test_data_loader):
         input, target, bicubic = batch[0], batch[1], batch[2]
+
+        print(input, target, bicubic, sep="\n")
+
         if opt.cuda:
             target = target.cuda() / args.rgb_range
             input = input.cuda() / args.rgb_range
