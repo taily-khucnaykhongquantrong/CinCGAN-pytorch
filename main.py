@@ -81,7 +81,7 @@ def main():
     DHR = _NetD(stride=2)
     GNO = _NetG_DOWN(stride=1)
 
-    Loaded = torch.load("experiment/model/EDSR_x{}.pt".format(scale))
+    Loaded = torch.load("experiment/model/edsr_baseline_x{}.pt".format(scale))
     GHR.load_state_dict(Loaded)
 
     model = nn.ModuleList()
