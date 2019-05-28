@@ -16,11 +16,11 @@ import torch.utils.data as data
 # from torchvision import transforms
 
 
-class MyImage(data.Dataset):
+class MyImage_(data.Dataset):
     def __init__(self, args, train=False):
         self.args = args
         self.train = False
-        self.name = "MyImage"
+        self.name = "MyImage_"
         self.scale = args.scale
         self.idx_scale = 0
         self.benchmark = False

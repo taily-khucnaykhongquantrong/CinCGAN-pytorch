@@ -21,9 +21,9 @@ parser.add_argument(
     "--dir_data", type=str, default="../../../dataset", help="dataset directory"
 )
 parser.add_argument(
-    "--data_train", type=str, default="myimage_", help="train dataset name"
+    "--data_train", type=str, default="MyImage_", help="train dataset name"
 )
-parser.add_argument("--data_test", type=str, default="myimage_", help="test dataset name")
+parser.add_argument("--data_test", type=str, default="MyImage_", help="test dataset name")
 parser.add_argument("--n_train", type=int, default=400, help="number of training set")
 parser.add_argument("--n_val", type=int, default=10, help="number of validation set")
 parser.add_argument(
