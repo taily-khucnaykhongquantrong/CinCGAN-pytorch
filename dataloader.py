@@ -155,7 +155,7 @@ class _MSDataLoaderIter(_DataLoaderIter):
             else:
                 self.data_queue = self.worker_result_queue
 
-            _update_worker_pids(id(self), tuple(w.pid for w in self.workers))
+            _set_worker_pids(id(self), tuple(w.pid for w in self.workers))
             _set_SIGCHLD_handler()
             self.worker_pids_set = True
 
