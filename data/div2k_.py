@@ -1,13 +1,12 @@
 import os
 
-from data import common
+# from data import common
 from data import srdata
 
-import numpy as np
-import scipy.misc as misc
+# import numpy as np
+# import torch
+# import torch.utils.data as data
 
-import torch
-import torch.utils.data as data
 
 class DIV2K(srdata.SRData):
     def __init__(self, args, train=True):
@@ -26,39 +25,33 @@ class DIV2K(srdata.SRData):
             idx_end = self.args.offset_val + self.args.n_val
 
         for i in range(idx_begin + 1, idx_end + 1):
-            filename = '{:0>4}'.format(i)
+            filename = "{:0>4}".format(i)
             list_hr.append(os.path.join(self.dir_hr, filename + self.ext))
             for si, s in enumerate(self.scale):
-                list_lr[si].append(os.path.join(
-                    self.dir_lr,
-                    '{}x{}m{}'.format(filename, s, self.ext)
-                ))
-                list_lrb[si].append(os.path.join(
-                    self.dir_lrb,
-                    'X{}/{}x{}{}'.format(s, filename, s, self.ext)
-                ))
+                list_lr[si].append(
+                    os.path.join(self.dir_lr, "{}x{}m{}".format(filename, s, self.ext))
+                )
+                list_lrb[si].append(
+                    os.path.join(
+                        self.dir_lrb, "X{}/{}x{}{}".format(s, filename, s, self.ext)
+                    )
+                )
 
         return list_hr, list_lr, list_lrb
 
     def _set_filesystem(self, dir_data):
-        self.apath = dir_data + '/DIV2K'
-        self.dir_hr = os.path.join(self.apath, 'DIV2K_train_HR')
-        self.dir_lr = os.path.join(self.apath, 'DIV2K_train_LR_mild')
-        self.dir_lrb = os.path.join(self.apath, 'DIV2K_train_LR_bicubic')
-        self.ext = '.png'
+        self.apath = dir_data + "/DIV2K"
+        self.dir_hr = os.path.join(self.apath, "DIV2K_train_HR")
+        self.dir_lr = os.path.join(self.apath, "DIV2K_train_LR_mild")
+        self.dir_lrb = os.path.join(self.apath, "DIV2K_train_LR_bicubic")
+        self.ext = ".png"
 
     def _name_hrbin(self):
-        return os.path.join(
-            self.apath,
-            'bin',
-            '{}_bin_HR.npy'.format(self.split)
-        )
+        return os.path.join(self.apath, "bin", "{}_bin_HR.npy".format(self.split))
 
     def _name_lrbin(self, scale):
         return os.path.join(
-            self.apath,
-            'bin',
-            '{}_bin_LR_X{}.npy'.format(self.split, scale)
+            self.apath, "bin", "{}_bin_LR_X{}.npy".format(self.split, scale)
         )
 
     def __len__(self):
@@ -72,4 +65,3 @@ class DIV2K(srdata.SRData):
             return idx % len(self.images_hr)
         else:
             return idx
-

@@ -113,6 +113,11 @@ def main():
         weight_decay=0,
     )
 
+    if opt.test_only:
+        print("===> Testing")
+        test(test_data_loader, model, opt.start_epoch)
+        return
+
     # optionally resume from a checkpoint
     opt.resume = "model_total_{}.pth".format(scale)
     if opt.resume:
@@ -135,11 +140,6 @@ def main():
     optimizer = [optG, optD]
 
     # print("===> Setting Optimizer")
-
-    if opt.test_only:
-        print("===> Testing")
-        test(test_data_loader, model, opt.start_epoch)
-        return
 
     if step == 1:
         print("===> Training Step 1.")

@@ -21,9 +21,9 @@ parser.add_argument(
     "--dir_data", type=str, default="../../../dataset", help="dataset directory"
 )
 parser.add_argument(
-    "--data_train", type=str, default="DIV2K", help="train dataset name"
+    "--data_train", type=str, default="myimage_", help="train dataset name"
 )
-parser.add_argument("--data_test", type=str, default="DIV2K", help="test dataset name")
+parser.add_argument("--data_test", type=str, default="myimage_", help="test dataset name")
 parser.add_argument("--n_train", type=int, default=400, help="number of training set")
 parser.add_argument("--n_val", type=int, default=10, help="number of validation set")
 parser.add_argument(
@@ -46,7 +46,7 @@ parser.add_argument(
 parser.add_argument(
     "--testpath",
     type=str,
-    default="../LR/LRBI/",  # test/DIV2K_val_LR_our',
+    default="/content/dataset/unknownCelebA_set1x4",
     help="dataset directory for testing",
 )
 parser.add_argument(
